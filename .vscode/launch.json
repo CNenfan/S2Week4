@@ -1,0 +1,194 @@
+{
+    // 启动调试的快捷键是 F5。
+    // 本文件提供三种 RoboMaster C 板（STM32F407IGH6）常用调试器配置：
+    // 1. DAPLink  -> OpenOCD -> GDB
+    // 2. ST-Link  -> OpenOCD -> GDB
+    // 3. J-Link   -> J-Link GDB Server -> GDB（不经过 OpenOCD）
+    //
+    // 当前配置对应 RoboMaster C 板：
+    // - MCU：STM32F407IGH6
+    // - ELF：build/week4.elf
+    // - SVD：stm32f407.svd
+    // - J-Link 设备名：STM32F407IG
+    //
+    // 如果换工程，主要修改 executable；
+    // 如果换 MCU，还要同步修改 device、svdFile 和 OpenOCD target。
+    //
+    // GDB、OpenOCD 的安装路径也可以放在 Cortex-Debug 的用户/全局设置中；
+    // 这里为 J-Link 单独指定 serverpath，因此不要求
+    // JLinkGDBServerCL.exe 已加入系统 PATH。
+
+    // J-Link 配置启用了 "runToEntryPoint": "main"：F5 后会先运行到 main，
+    // 避免停在启动汇编时按单步出现
+    //     Cannot find bounds of current function (from exec-next --thread 1)
+    // 启动时可能出现 GDB 的 CP1252 -> UTF-32 警告，这是该工具链缺少 iconv
+    // 导致的已知噪音，不影响断点和单步，忽略即可。
+
+    "version": "0.2.0",
+
+    "configurations": [
+
+        // ============================================================
+        // DAPLink / CMSIS-DAP
+        // ============================================================
+        {
+            "name": "DAPLink",
+            "cwd": "${workspaceFolder}",
+
+            // 要下载并调试的 ELF 文件。
+            "executable": "${workspaceFolder}\\build\\week4.elf",
+
+            "request": "launch",
+            "type": "cortex-debug",
+
+            // 当前目标芯片：RoboMaster C 板 STM32F407IGH6。
+            "device": "STM32F407IGHx",
+
+            // SVD 文件用于查看 STM32F407 外设寄存器。
+            "svdFile": "${workspaceFolder}/stm32f407.svd",
+
+            // DAPLink 实现 CMSIS-DAP，这里通过 OpenOCD 连接。
+            "servertype": "openocd",
+
+            // interface/cmsis-dap.cfg：选择 CMSIS-DAP / DAPLink 调试器
+            // target/stm32f4x.cfg：选择 STM32F4 系列目标芯片
+            "configFiles": [
+                "interface/cmsis-dap.cfg",
+                "target/stm32f4x.cfg"
+            ],
+
+            // DAPLink 配置不使用 runToEntryPoint；使用它时请先在 main 设置断点。
+            // "runToEntryPoint": "main",
+
+            // 使用 FreeRTOS 时取消下面这一行的注释；
+            // 裸机工程不要启用。
+            // "rtos": "FreeRTOS",
+
+            // Live Watch：程序运行时实时观察变量。
+            "liveWatch": {
+                "enabled": true,
+                "samplesPerSecond": 4
+            },
+
+            // 必须保留：
+            // 指定 GDB 的 debug-file-directory，避免部分新版 GDB
+            // 在加载调试信息时出现路径/调试文件相关问题。
+            "debuggerArgs": [
+                "-iex",
+                "set debug-file-directory ${workspaceFolder}/.gdb-debug"
+            ],
+
+            // F5 启动调试前，先执行 tasks.json 中的 build task。
+            "preLaunchTask": "build task"
+        },
+
+        // ============================================================
+        // ST-Link
+        // ============================================================
+        {
+            "name": "ST-Link",
+            "cwd": "${workspaceFolder}",
+
+            // 要下载并调试的 ELF 文件。
+            "executable": "${workspaceFolder}/build/week4.elf",
+
+            "request": "launch",
+            "type": "cortex-debug",
+
+            "device": "STM32F407IGHx",
+            "svdFile": "${workspaceFolder}/stm32f407.svd",
+
+            // ST-Link 这里使用 OpenOCD 作为 GDB Server。
+            "servertype": "openocd",
+
+            // interface/stlink.cfg：选择 ST-Link 调试器
+            // target/stm32f4x.cfg：选择 STM32F4 系列目标芯片
+            "configFiles": [
+                "interface/stlink.cfg",
+                "target/stm32f4x.cfg"
+            ],
+
+            // ST-Link 配置不使用 runToEntryPoint；使用它时请先在 main 设置断点。
+            // "runToEntryPoint": "main",
+
+            // 使用 FreeRTOS 时取消下面这一行的注释；
+            // 裸机工程不要启用。
+            // "rtos": "FreeRTOS",
+
+            // Live Watch：程序运行时实时观察变量。
+            "liveWatch": {
+                "enabled": true,
+                "samplesPerSecond": 4
+            },
+
+            // 必须保留。
+            "debuggerArgs": [
+                "-iex",
+                "set debug-file-directory ${workspaceFolder}/.gdb-debug"
+            ],
+
+            // F5 启动调试前先编译。
+            "preLaunchTask": "build task"
+        },
+
+        // ============================================================
+        // J-Link（RoboMaster C 板当前推荐）
+        // ============================================================
+        {
+            "name": "J-Link",
+            "cwd": "${workspaceFolder}",
+
+            // 要下载并调试的 ELF 文件。
+            "executable": "${workspaceFolder}/build/week4.elf",
+
+            "request": "launch",
+            "type": "cortex-debug",
+
+            // SEGGER 设备数据库中的 STM32F407IGH6 对应设备名是 STM32F407IG。
+            // 不要填 CubeMX 的完整料号 STM32F407IGH6TR，否则可能无法匹配。
+            "device": "STM32F407IG",
+
+            // J-Link 直接使用 SEGGER J-Link GDB Server，
+            // 不经过 OpenOCD，因此这里不需要 configFiles。
+            "servertype": "jlink",
+
+            // 关键：显式指定 J-Link GDB Server 的完整路径，
+            // 解决 “spawn JLinkGDBServerCL.exe ENOENT”。
+            "serverpath": "D:/Software/CodeSoftware/JLink_V956/JLinkGDBServerCL.exe",
+
+            // RoboMaster C 板使用 SWD 接口。
+            "interface": "swd",
+
+            // 1 MHz 更稳妥；熟悉后可删除本项，恢复 J-Link 默认速率。
+            "serverArgs": [
+                "-speed",
+                "1000"
+            ],
+
+            // SVD 文件用于查看 STM32F407 外设寄存器。
+            "svdFile": "${workspaceFolder}/stm32f407.svd",
+
+            // 启动后直接停在 main，避免在启动汇编中执行 exec-next。
+            "runToEntryPoint": "main",
+
+            // 使用 FreeRTOS 时取消下面这一行的注释；
+            // 裸机工程不要启用。
+            // "rtos": "FreeRTOS",
+
+            // Live Watch：程序持续运行时实时观察变量。
+            "liveWatch": {
+                "enabled": true,
+                "samplesPerSecond": 4
+            },
+
+            // 必须保留。
+            "debuggerArgs": [
+                "-iex",
+                "set debug-file-directory ${workspaceFolder}/.gdb-debug"
+            ],
+
+            // F5 启动调试前先编译。
+            "preLaunchTask": "build task"
+        }
+    ]
+}

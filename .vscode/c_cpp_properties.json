@@ -1,0 +1,56 @@
+{
+    "version": 4,
+    "configurations": [
+        {
+            "name": "STM32F103",
+            "includePath": [
+                "${workspaceFolder}/Core/Inc",
+                "${workspaceFolder}/Drivers/STM32F1xx_HAL_Driver/Inc",
+                "${workspaceFolder}/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy",
+                "${workspaceFolder}/Drivers/CMSIS/Device/ST/STM32F1xx/Include",
+                "${workspaceFolder}/Drivers/CMSIS/Include",
+                "${workspaceFolder}/Middlewares/ST/STM32_USB_Device_Library/Core/Inc",
+                "${workspaceFolder}/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Inc"
+            ],
+            "defines": [
+                "USE_HAL_DRIVER",
+                "STM32F103xB"
+            ],
+            "compilerPath": "arm-none-eabi-gcc",
+            "compilerArgs": [
+                "-mcpu=cortex-m3",
+                "-mthumb"
+            ],
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-gcc-arm"
+        },
+        {
+            "name": "STM32F407",
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "arm-none-eabi-gcc",
+            "cStandard": "c11",
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "windows-gcc-arm",
+            "compilerPathInCppPropertiesJson": "D:\\Enfan\\Code\\C\\MinGW\\bin\\gcc.exe",
+            "mergeConfigurations": false,
+            "recursiveIncludes": {},
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "d:/Enfan/Robomaster/stm32_learning/week4/Core/Inc",
+                "d:/Enfan/Robomaster/stm32_learning/week4/Drivers/STM32F4xx_HAL_Driver/Inc",
+                "d:/Enfan/Robomaster/stm32_learning/week4/Drivers/STM32F4xx_HAL_Driver/Inc/Legacy",
+                "d:/Enfan/Robomaster/stm32_learning/week4/Drivers/CMSIS/Device/ST/STM32F4xx/Include",
+                "d:/Enfan/Robomaster/stm32_learning/week4/Drivers/CMSIS/Include",
+                "d:/Enfan/Robomaster/stm32_learning/week4/Middlewares/ST/STM32_USB_Device_Library/Core/Inc",
+                "d:/Enfan/Robomaster/stm32_learning/week4/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Inc"
+            ]
+        }
+    ]
+}
